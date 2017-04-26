@@ -9,15 +9,19 @@
             <div class="row">
               <div class="col-md-12">
                 <input type="text" class="form-control" placeholder="Enter Postcode" v-model="startingZip">
-                <span class="city-span text-success">{{errorLog}}</span>
+                <span class="city-span" v-bind:class="errorColor">{{errorLog}}</span>
               </div>
             </div>
             <div class="row">
               <div class="col-md-12">
-                <h1 class="text-center">Results</h1>
-                <div class="results">
+                <div class="results" v-show="showResults">
+                  <h1 class="text-center">Results</h1>
                   <table class="table table-hover table-bordered">
                     <tbody>
+                      <tr class="warning">
+                        <td>Parish</td>
+                        <td>{{ parish }}</td>
+                      </tr>
                       <tr  class="danger">
                         <td>Admin county</td>
                         <td>{{ adminCounty }}</td>
@@ -50,11 +54,7 @@
                         <td>NUTS</td>
                         <td>{{ nuts }}</td>
                       </tr>
-                      <tr>
-                        <td>Parish</td>
-                        <td>{{ parish }}</td>
-                      </tr>
-                      <tr>
+                      <tr class="warning">
                         <td>Parliamentary Constituancy</td>
                         <td>{{ parliamentConst }}</td>
                       </tr>
@@ -89,8 +89,10 @@ export default {
         },
       data() {
         return {
+          showResults: false,
           startingZip: '',
           errorLog: '',
+          errorColor: 'text-warning',
           adminCounty: '',
           adminDistrict: '',
           adminWard: '',
@@ -117,7 +119,9 @@ export default {
           app.errorLog = "Searching..."
           axios.get('https://api.postcodes.io/postcodes/' + app.startingZip)
             .then(function (response) {
+              app.errorColor = "text-success"
               app.errorLog = "Success"
+
               app.adminCounty = response.data.result.admin_county
               app.adminDistrict = response.data.result.admin_district
               app.adminWard = response.data.result.admin_ward
@@ -129,10 +133,13 @@ export default {
               app.pct = response.data.result.primary_care_trust
               app.nhsHa = response.data.result.nhs_ha
               app.region = response.data.result.region
+              app.showResults = true
             })
             .catch(function (error) {
               console.log(error)
+              app.errorColor = "text-danger"
               app.errorLog = "Invalid Postcode"
+              app.showResults = false
             })
         }, 500)
       }
@@ -140,7 +147,7 @@ export default {
 </script>
 <style>
 #app {
-  height: 100%;
+  height: 768px;
   width: 100vw;
   background-color: red;
   background: url("https://source.unsplash.com/category/nature/1920x1080") no-repeat center center fixed;
